@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <!-- add real link here later -->
+    <title>ultimate tic tac toe by shalin</title>
+    <script 
+    src="https://cdn.socket.io/4.6.0/socket.io.min.js" 
+    integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" 
+    crossorigin="anonymous">
+    </script>
+    <script 
+        src="https://kit.fontawesome.com/7f5c9ef1f6.js" 
+        crossorigin="anonymous">
+    </script>
+</head>
+
+
+
+<body>
+    <div id="gameboard">
+        <div class="large-grid" id="NW">
+            <div class="small-grid" id="NW-NW">NW-NW</div>
+            <div class="small-grid" id="NW-N">NW-N</div>
+            <div class="small-grid" id="NW-NE">NW-NE</div>
+            <div class="small-grid" id="NW-W">NW-W</div>
+            <div class="small-grid" id="NW-C">NW-C</div>
+            <div class="small-grid" id="NW-E">NW-E</div>
+            <div class="small-grid" id="NW-SW">NW-SW</div>
+            <div class="small-grid" id="NW-S">NW-S</div>
+            <div class="small-grid" id="NW-SE">NW-SE</div>
+        </div>
+        <div class="large-grid" id="N">
+            <div class="small-grid" id="N-NW">N-NW</div>
+            <div class="small-grid" id="N-N">N-N</div>
+            <div class="small-grid" id="N-NE">N-NE</div>
+            <div class="small-grid" id="N-W">N-W</div>
+            <div class="small-grid" id="N-C">N-C</div>
+            <div class="small-grid" id="N-E">N-E</div>
+            <div class="small-grid" id="N-SW">N-SW</div>
+            <div class="small-grid" id="N-S">N-S</div>
+            <div class="small-grid" id="N-SE">N-SE</div>
+        </div>
+        <div class="large-grid" id="NE">
+            <div class="small-grid" id="NE-NW">NE-NW</div>
+            <div class="small-grid" id="NE-N">NE-N</div>
+            <div class="small-grid" id="NE-NE">NE-NE</div>
+            <div class="small-grid" id="NE-W">NE-W</div>
+            <div class="small-grid" id="NE-C">NE-C</div>
+            <div class="small-grid" id="NE-E">NE-E</div>
+            <div class="small-grid" id="NE-SW">NE-SW</div>
+            <div class="small-grid" id="NE-S">NE-S</div>
+            <div class="small-grid" id="NE-SE">NE-SE</div>
+        </div>
+        <div class="large-grid" id="W">
+            <div class="small-grid" id="W-NW">W-NW</div>
+            <div class="small-grid" id="W-N">W-N</div>
+            <div class="small-grid" id="W-NE">W-NE</div>
+            <div class="small-grid" id="W-W">W-W</div>
+            <div class="small-grid" id="W-C">W-C</div>
+            <div class="small-grid" id="W-E">W-E</div>
+            <div class="small-grid" id="W-SW">W-SW</div>
+            <div class="small-grid" id="W-S">W-S</div>
+            <div class="small-grid" id="W-SE">W-SE</div>
+        </div>
+        <div class="large-grid" id="C">
+            <div class="small-grid" id="C-NW">C-NW</div>
+            <div class="small-grid" id="C-N">C-N</div>
+            <div class="small-grid" id="C-NE">C-NE</div>
+            <div class="small-grid" id="C-W">C-W</div>
+            <div class="small-grid" id="C-C">C-C</div>
+            <div class="small-grid" id="C-E">C-E</div>
+            <div class="small-grid" id="C-SW">C-SW</div>
+            <div class="small-grid" id="C-S">C-S</div>
+            <div class="small-grid" id="C-SE">C-SE</div>
+        </div>
+        <div class="large-grid" id="E">
+            <div class="small-grid" id="E-NW">E-NW</div>
+            <div class="small-grid" id="E-N">E-N</div>
+            <div class="small-grid" id="E-NE">E-NE</div>
+            <div class="small-grid" id="E-W">E-W</div>
+            <div class="small-grid" id="E-C">E-C</div>
+            <div class="small-grid" id="E-E">E-E</div>
+            <div class="small-grid" id="E-SW">E-SW</div>
+            <div class="small-grid" id="E-S">E-S</div>
+            <div class="small-grid" id="E-SE">E-SE</div>
+        </div>
+        <div class="large-grid" id="SW">
+            <div class="small-grid" id="SW-NW">SW-NW</div>
+            <div class="small-grid" id="SW-N">SW-N</div>
+            <div class="small-grid" id="SW-NE">SW-NE</div>
+            <div class="small-grid" id="SW-W">SW-W</div>
+            <div class="small-grid" id="SW-C">SW-C</div>
+            <div class="small-grid" id="SW-E">SW-E</div>
+            <div class="small-grid" id="SW-SW">SW-SW</div>
+            <div class="small-grid" id="SW-S">SW-S</div>
+            <div class="small-grid" id="SW-SE">SW-SE</div>
+        </div>
+        <div class="large-grid" id="S">
+            <div class="small-grid" id="S-NW">S-NW</div>
+            <div class="small-grid" id="S-N">S-N</div>
+            <div class="small-grid" id="S-NE">S-NE</div>
+            <div class="small-grid" id="S-W">S-W</div>
+            <div class="small-grid" id="S-C">S-C</div>
+            <div class="small-grid" id="S-E">S-E</div>
+            <div class="small-grid" id="S-SW">S-SW</div>
+            <div class="small-grid" id="S-S">S-S</div>
+            <div class="small-grid" id="S-SE">S-SE</div>
+        </div>
+        <div class="large-grid" id="SE">
+            <div class="small-grid" id="SE-NW">SE-NW</div>
+            <div class="small-grid" id="SE-N">SE-N</div>
+            <div class="small-grid" id="SE-NE">SE-NE</div>
+            <div class="small-grid" id="SE-W">SE-W</div>
+            <div class="small-grid" id="SE-C">SE-C</div>
+            <div class="small-grid" id="SE-E">SE-E</div>
+            <div class="small-grid" id="SE-SW">SE-SW</div>
+            <div class="small-grid" id="SE-S">SE-S</div>
+            <div class="small-grid" id="SE-SE">SE-SE</div>
+        </div>
+    </div>
+</body>
+</html>
