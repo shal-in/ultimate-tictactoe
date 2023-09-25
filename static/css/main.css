@@ -4,16 +4,11 @@
 }
 
 :root {
-    --background: #E1DEE9;
-    --gridColour: #04151F;
-    --gridBackground: #A1A5A4;
-    --gridPlayed: orange;
-    --XColour: #028090;
-    --OColour: #D81E5B;
-}
-/*  desktop-view */
-@media (min-width:500px) {
-
+    --backgroundCol: #E0E0E2; 
+    --gridCol: #3B2C35;
+    --gridBGCol: #607B7D;
+    --XCol: #2B56A1;
+    --OCol: #CC3F0C;
 }
  
 body {
@@ -22,12 +17,54 @@ body {
     align-items: center;
     justify-content: start;
     height: 95vh;
-    background-color: var(--background);
+    background-color: var(--backgroundCol);
     font-family: 'Kalam';
 }
 
+#header-container {
+    width: 100%;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#row1 {
+    width: 100%;
+    height: 50px;
+    /* border: 1px solid blue; */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+#title, #themes-btn, #link-btn {
+    color: var(--gridCol);
+    font-weight: bold;
+    font-size: 25px;
+    user-select: none;
+}
+
+#title {
+    margin-left: 12px;
+    margin-top: 12px;
+}
+
+#themes-btn {
+    margin-right: 12px;
+    margin-top: 12px;
+}
+
+#link-btn {
+    margin-left: 12px;
+}
+
+.underline-text {
+    text-decoration: underline;
+}
+
 #gameboard {
-    margin-top: 50px;
+    margin-top: 75px;
     width: 365px;
     height: 365px;
     /* border: 1px solid orange; */
@@ -41,7 +78,7 @@ body {
     padding: 5px;
     width: 109px;
     height: 109px;
-    border: 2px solid var(--gridColour);
+    border: 2px solid var(--gridCol);
     /* border: 2px solid black; */
     display: flex;
     flex-wrap: wrap;
@@ -87,8 +124,8 @@ body {
 .small-grid {
     width: 35px;
     height: 35px;
-    border: 1px solid var(--gridColour);
-    background-color: antiquewhite;
+    border: 1px solid var(--gridCol);
+    background-color: var(--backgroundCol);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -131,4 +168,13 @@ body {
 /* bottom right */
 .small-grid:nth-child(9) {
     border-bottom-right-radius: 30%;
+}
+
+
+
+
+
+/*  desktop-view */
+@media (min-width:500px) {
+
 }
