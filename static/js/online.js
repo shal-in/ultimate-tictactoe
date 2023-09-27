@@ -1,3 +1,142 @@
+// set up socket connection to server
+const socket = io();
+const currentURL = window.location.href;
+const gameid = currentURL.split('/').pop();
+
+let playerID; let currentPlayer;
+
+socket.on('connection_response', function(data) {
+    let sessionID = data.sessionid;
+    console.log(`sessionid: ${sessionID}`);
+    console.log(`gameid: ${gameid}`);
+    let oldSessionID = localStorage.getItem(gameid);
+    localStorage.setItem(gameid, sessionID);
+
+    if (oldSessionID) {
+        payLoad = {
+            'gameid': gameid,
+            'oldSessionID': oldSessionID
+        }
+
+        socket.emit('game_reconnect', payLoad)
+    }
+
+    else {
+        let payLoad = {
+            'gameid': gameid
+        }
+    
+        socket.emit('game_connect', payLoad);
+    }
+})
+
+socket.on('join_error', function(data) {
+    window.location.href = '/u-ttt';
+    alert(data.message);
+    return
+})
+
+socket.on('game_connect_response', function(data) {
+    let moves = data.moves;
+    playerID = data.playerid;
+
+    let lastMove = moves[moves.length - 1];
+    if (!lastMove) {
+        currentPlayer = 'X';
+    }
+    else {
+        const id = lastMove[1];
+        currentPlayer = lastMove[0];
+        let largeGridPlayed = parseInt(id[0]);
+        let smallGridPlayed = parseInt(id[1]);
+    
+        e = fullGameEl[largeGridPlayed][smallGridPlayed];
+        e.innerHTML = currentPlayer;
+        e.style.color = currentPlayerColour(currentPlayer);
+        fullGameArray[largeGridPlayed][smallGridPlayed] = currentPlayer;
+
+        currentPlayer = changeCurrentPlayer();
+
+        nextLargeGrid = nextLargeGridFunction(smallGridPlayed)
+    }
+
+    if (currentPlayer === playerID) {
+        handleEventListeners('add');
+    }
+    updateColours()
+})
+
+socket.on('game_reconnect_response', function(data) {
+    sessionID = data.sessionid;
+    moves = data.moves;
+
+    if (!playerID) {
+        playerID = data.playerid;
+    }
+
+    if (moves.length === 0) {
+        currentPlayer = 'X'
+
+        if (currentPlayer === playerID) {
+            handleEventListeners('add');
+        }
+        return
+    }
+
+    else {
+        for (let i=0; i<moves.length; i++) {
+            move = moves[i];
+            currentPlayer = move[0]; id = move[1]
+
+            largeGridPlayed = parseInt(id[0]);
+            smallGridPlayed = parseInt(id[1]);
+        
+            e = fullGameEl[largeGridPlayed][smallGridPlayed];
+            e.innerHTML = currentPlayer;
+            e.style.color = currentPlayerColour(currentPlayer);
+            fullGameArray[largeGridPlayed][smallGridPlayed] = currentPlayer;
+    
+            checkGame(largeGridPlayed);
+        }
+
+        currentPlayer = changeCurrentPlayer();
+
+        if (currentPlayer === playerID) {
+            console.log('your turn')
+            nextLargeGrid = nextLargeGridFunction(smallGridPlayed);
+            handleEventListeners('add');
+        }
+        else {
+            console.log('opponents turn')
+        }
+        updateColours()
+    }
+    
+})
+
+socket.on('play_response', function(data) {
+    lastMove = data.move;
+
+    const id = lastMove[1];
+    currentPlayer = lastMove[0];
+    let largeGridPlayed = parseInt(id[0]);
+    let smallGridPlayed = parseInt(id[1]);
+
+    e = fullGameEl[largeGridPlayed][smallGridPlayed];
+    e.innerHTML = currentPlayer;
+    e.style.color = currentPlayerColour(currentPlayer);
+    fullGameArray[largeGridPlayed][smallGridPlayed] = currentPlayer;
+
+    checkGame(largeGridPlayed)
+    nextLargeGrid = nextLargeGridFunction(smallGridPlayed)
+    currentPlayer = changeCurrentPlayer();
+
+    handleEventListeners('add');
+    updateColours();
+})
+
+
+// themes
 const root = document.documentElement;
 
 let themes = ['light', 'dark'];
@@ -6,20 +145,9 @@ if (!themesIndex) {
     themesIndex = 0;
 }
 
-// header container
-themesBtnEl = document.querySelector('#themes-btn');
-themesBtnEl.addEventListener('click', themesIndexCounter);
-
-linkBtnEl = document.querySelector('#link-btn');
-linkBtnEl.addEventListener('click', linkBtnFunction);
-
-homeBtnEl = document.querySelector('#title');
-homeBtnEl.addEventListener('click', homeBtnFunction);
-
-
 function themesIndexCounter() {
     themesIndex ++;
-    if (themesIndex === themes.length) {
+    if (themesIndex >= themes.length) {
         themesIndex = 0;
     }
     localStorage.setItem('themesIndex', themesIndex);
@@ -38,6 +166,16 @@ function toggleThemes() {
 
 }
 
+
+// header container
+themesBtnEl = document.querySelector('#themes-btn');
+themesBtnEl.addEventListener('click', themesIndexCounter)
+
+linkBtnEl = document.querySelector('#link-btn');
+linkBtnEl.addEventListener('click', linkBtnFunction);
+
+homeBtnEl = document.querySelector('#title');
+homeBtnEl.addEventListener('click', homeBtnFunction);
 
 function homeBtnFunction() {
     console.log('home')
@@ -85,7 +223,6 @@ let eventListenerTracker = [
 
 
 // initialise variables for game + set up game
-let currentPlayer = 'X';
 let gameWinner;
 let gameWinningSquares;
 let nextLargeGrid = 'none';
@@ -93,7 +230,6 @@ let largeGridPlayed;
 
 toggleThemes()
 updateColours()
-handleEventListeners('add');
 
 
 // define functions
@@ -104,10 +240,15 @@ function boxClicked(e) {
     let smallGridPlayed = parseInt(id[1]);
 
     e.target.innerHTML = currentPlayer;
-    e.target.style.color = currentPlayerColour();
+    e.target.style.color = currentPlayerColour(currentPlayer);
     fullGameArray[largeGridPlayed][smallGridPlayed] = currentPlayer;
     handleEventListeners('remove');
 
+    payLoad = {
+        'gameid': gameid,
+        'move': [playerID, id]
+    }
+    socket.emit('play', payLoad);
 
     // check game
     checkGame(largeGridPlayed)
@@ -115,9 +256,6 @@ function boxClicked(e) {
     currentPlayer = changeCurrentPlayer();
 
     // set up for next turn
-    if (!gameWinner) {
-        handleEventListeners('add');
-    }
     updateColours()
 }
 
@@ -169,30 +307,65 @@ function handleEventListeners(event) {
 
 function checkGame(largeGridPlayed) {
     let winningCombos = [
-        [0,1,2],[3,4,5],[6,7,8],[0,3,6],
+        [0,1,2],[3,4,5],[6,7,8],[0,3,4],
         [1,4,7],[2,5,8],[0,4,8],[2,4,6],
     ]
 
     // check small grid and update large grid
-    row = fullGameArray[largeGridPlayed];
-    for (combo of winningCombos) {
-        let a = combo[0]; let b = combo[1]; let c = combo[2];
-        
-        if (row[a] !== '') {
-            if (row[a] === row[b] && row[a] === row[c]) {
-                largeGameArray[largeGridPlayed] = row[a];
-                largeGridTextEl[largeGridPlayed].innerHTML = row[a];
+    if (largeGridPlayed !== 'all') {
+        row = fullGameArray[largeGridPlayed];
+        for (combo of winningCombos) {
+            let a = combo[0]; let b = combo[1]; let c = combo[2];
+            
+            if (row[a] !== '') {
+                if (row[a] === row[b] && row[a] === row[c]) {
+                    largeGameArray[largeGridPlayed] = row[a];
+                    largeGridTextEl[largeGridPlayed].innerHTML = row[a];
+                    largeGridTextEl[largeGridPlayed].style.display = 'flex';
+                    largeGridTextEl[largeGridPlayed].style.color = currentPlayerColour(currentPlayer);
+                }
+            }
+        }
+        // if a small grid is full and there is no winner, declare it a draw
+        if (findInstances(row, '').length === 0 && largeGameArray[largeGridPlayed] === '') {
+            largeGameArray[largeGridPlayed] = '-';
+            largeGridTextEl[largeGridPlayed].innerHTML = '-';
+            largeGridTextEl[largeGridPlayed].style.display = 'flex';
+            largeGridTextEl[largeGridPlayed].style.color = 'var(--grid-main)';
+        }
+    }
+
+    else { // check all grids
+        for (let largeGridPlayed=0; largeGridPlayed<9; largeGridPlayed++) {
+            row = fullGameArray[largeGridPlayed];
+            for (combo of winningCombos) {
+                let a = combo[0]; let b = combo[1]; let c = combo[2];
+                
+                if (row[a] !== '') {
+                    if (row[a] === row[b] && row[a] === row[c]) {
+                        largeGameArray[largeGridPlayed] = row[a];
+                        largeGridTextEl[largeGridPlayed].innerHTML = row[a];
+                        largeGridTextEl[largeGridPlayed].style.display = 'flex';
+                        largeGridTextEl[largeGridPlayed].style.color = currentPlayerColour(currentPlayer);
+                    }
+                }
+            }
+            // if a small grid is full and there is no winner, declare it a draw
+            if (findInstances(row, '').length === 0 && largeGameArray[largeGridPlayed] === '') {
+                largeGameArray[largeGridPlayed] = '-';
+                largeGridTextEl[largeGridPlayed].innerHTML = '-';
                 largeGridTextEl[largeGridPlayed].style.display = 'flex';
-                largeGridTextEl[largeGridPlayed].style.color = currentPlayerColour();
+                largeGridTextEl[largeGridPlayed].style.color = 'var(--grid-main)';
             }
         }
     }
+
     // if a small grid is full and there is no winner, declare it a draw
     if (findInstances(row, '').length === 0 && largeGameArray[largeGridPlayed] === '') {
         largeGameArray[largeGridPlayed] = '-';
         largeGridTextEl[largeGridPlayed].innerHTML = '-';
         largeGridTextEl[largeGridPlayed].style.display = 'flex';
-        largeGridTextEl[largeGridPlayed].style.color =  'var(--grid-main)';
+        largeGridTextEl[largeGridPlayed].style.color = 'var(--grid-main)';
     }
  
     // check large grid
@@ -203,6 +376,7 @@ function checkGame(largeGridPlayed) {
             if (largeGameArray[a] === largeGameArray[b] && largeGameArray[a] === largeGameArray[c]) {
                 gameWinner = largeGameArray[a]
                 gameWinningSquares = [a,b,c];
+                handleEventListeners('remove')
                 return
             }
         }
@@ -217,16 +391,19 @@ function checkGame(largeGridPlayed) {
             console.log('Draw: O wins on poins')
             gameWinner = 'O'
             gameWinningSquares = findInstances(largeGameArray, 'O')
+            handleEventListeners('remove')
             return
         }
         else if (XPoints > OPoints) {
             console.log('Draw: X wins on points')
             gameWinner = 'X'
             gameWinningSquares = findInstances(largeGameArray, 'O')
+            handleEventListeners('remove')
             return
         }
         else if (XPoints === OPoints) {
             console.log('Draw')
+            handleEventListeners('remove')
             return
         }
     }
@@ -251,7 +428,7 @@ function changeCurrentPlayer() {
     }
 }
 
-function currentPlayerColour() {
+function currentPlayerColour(currentPlayer) {
     if (currentPlayer === 'X') {
         return 'var(--X-main)'
     }
@@ -282,6 +459,15 @@ function updateColours() {
             for (let col=0; col<9; col++) {
                 fullGameEl[row][col].style.backgroundColor = 'var(--winning-main)';
             }
+        }
+        return
+    }
+
+    if (currentPlayer !== playerID) {
+        for (row=0; row<9; row++) {
+            for (col=0; col<9; col++) {
+                fullGameEl[row][col].style.backgroundColor = 'var(--BG-main)'
+            } 
         }
         return
     }
