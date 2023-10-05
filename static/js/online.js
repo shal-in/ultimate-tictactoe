@@ -58,11 +58,23 @@ socket.on('game_connect_response', function(data) {
         currentPlayer = changeCurrentPlayer();
 
         nextLargeGrid = nextLargeGridFunction(smallGridPlayed)
+
+        turnCount = 1;
+        updateTurnLabel()
     }
 
     if (currentPlayer === playerID) {
         handleEventListeners('add');
+        turnLabelText = `you are ${playerID}. it is your turn.`
+        if (playerID === 'X') {
+            inviteContainerEl.style.display = 'flex';
+        }
     }
+    else {
+        turnLabelText = `you are ${playerID}. it is your opponent's turn.`
+    }
+
+    turnLabelEl.textContent = turnLabelText;
     updateColours()
 })
 
@@ -79,7 +91,12 @@ socket.on('game_reconnect_response', function(data) {
 
         if (currentPlayer === playerID) {
             handleEventListeners('add');
+            turnLabelText = `you are ${playerID}. it is your turn.`;
         }
+        else {
+            turnLabelText = `you are ${playerID}. it is your opponent's turn.`;
+        }
+        turnLabelEl.textContent = turnLabelText;
         return
     }
 
@@ -97,6 +114,12 @@ socket.on('game_reconnect_response', function(data) {
             fullGameArray[largeGridPlayed][smallGridPlayed] = currentPlayer;
     
             checkGame(largeGridPlayed);
+            turnCount++;
+        }
+
+        if (gameWinner) {
+            updateColours()
+            return
         }
 
         currentPlayer = changeCurrentPlayer();
@@ -105,10 +128,14 @@ socket.on('game_reconnect_response', function(data) {
             console.log('your turn')
             nextLargeGrid = nextLargeGridFunction(smallGridPlayed);
             handleEventListeners('add');
+            turnLabelText = `you are ${playerID}. it is your turn.`;
         }
         else {
-            console.log('opponents turn')
+            turnLabelText = `you are ${playerID}. it is your opponent's turn.`;
         }
+
+        turnLabelEl.textContent = turnLabelText;
+        updateTurnLabel()
         updateColours()
     }
     
@@ -133,8 +160,16 @@ socket.on('play_response', function(data) {
 
     handleEventListeners('add');
     updateColours();
+    turnCount++;
+    updateTurnLabel()
+
+    turnLabelText = 'it is your turn';
+    turnLabelEl.textContent = turnLabelText;
 })
 
+socket.on('join_response', function() {
+    inviteContainerEl.style.display = 'none'
+})
 
 // themes
 const root = document.documentElement;
@@ -166,6 +201,18 @@ function toggleThemes() {
 
 }
 
+// turn count
+let turnCountEl = document.querySelector('#turn-count');
+let turnLabelEl = document.querySelector('#turn-label');
+
+let turnCount = 0;
+let turnLabelText;
+
+function updateTurnLabel() {
+    turnCountEl.textContent = `turn count: ${turnCount}`;
+}
+
+let inviteContainerEl = document.querySelector('#invite-container');
 
 // header container
 themesBtnEl = document.querySelector('#themes-btn');
@@ -243,6 +290,7 @@ function boxClicked(e) {
     e.target.style.color = currentPlayerColour(currentPlayer);
     fullGameArray[largeGridPlayed][smallGridPlayed] = currentPlayer;
     handleEventListeners('remove');
+    turnCount++;
 
     payLoad = {
         'gameid': gameid,
@@ -256,7 +304,10 @@ function boxClicked(e) {
     currentPlayer = changeCurrentPlayer();
 
     // set up for next turn
+    turnLabelText = `it is your opponent's turn`;
+    turnLabelEl.textContent = turnLabelText;
     updateColours()
+    updateTurnLabel()
 }
 
 function handleEventListeners(event) {
@@ -307,7 +358,7 @@ function handleEventListeners(event) {
 
 function checkGame(largeGridPlayed) {
     let winningCombos = [
-        [0,1,2],[3,4,5],[6,7,8],[0,3,4],
+        [0,1,2],[3,4,5],[6,7,8],[0,3,6],
         [1,4,7],[2,5,8],[0,4,8],[2,4,6],
     ]
 
@@ -323,6 +374,7 @@ function checkGame(largeGridPlayed) {
                     largeGridTextEl[largeGridPlayed].innerHTML = row[a];
                     largeGridTextEl[largeGridPlayed].style.display = 'flex';
                     largeGridTextEl[largeGridPlayed].style.color = currentPlayerColour(currentPlayer);
+
                 }
             }
         }
@@ -377,6 +429,15 @@ function checkGame(largeGridPlayed) {
                 gameWinner = largeGameArray[a]
                 gameWinningSquares = [a,b,c];
                 handleEventListeners('remove')
+
+                if (gameWinner === playerID) {
+                    turnLabelText = `you win!!`;
+                }
+                else {
+                    turnLabelText = `your opponent wins.`;
+                }
+                turnLabelEl.textContent = turnLabelText;
+                turnCountEl.textContent = ''
                 return
             }
         }
@@ -392,6 +453,15 @@ function checkGame(largeGridPlayed) {
             gameWinner = 'O'
             gameWinningSquares = findInstances(largeGameArray, 'O')
             handleEventListeners('remove')
+
+            if (gameWinner === playerID) {
+                turnLabelText = `you win!!`;
+            }
+            else {
+                turnLabelText = `your opponent wins.`;
+            }
+            turnLabelEl.textContent = turnLabelText;
+            turnCountEl.textContent = ''
             return
         }
         else if (XPoints > OPoints) {
@@ -399,11 +469,23 @@ function checkGame(largeGridPlayed) {
             gameWinner = 'X'
             gameWinningSquares = findInstances(largeGameArray, 'O')
             handleEventListeners('remove')
+            if (gameWinner === playerID) {
+                turnLabelText = `you win!!`;
+            }
+            else {
+                turnLabelText = `your opponent wins.`;
+            }
+            turnLabelEl.textContent = turnLabelText;
+            turnCountEl.textContent = ''
             return
         }
         else if (XPoints === OPoints) {
             console.log('Draw')
             handleEventListeners('remove')
+
+            turnLabelText = `it is a draw!!`;
+            turnLabelEl.textContent = turnLabelText;
+            turnCountEl.textContent = ''
             return
         }
     }

@@ -123,12 +123,17 @@ def game_connect(data):
     else: 
         playerid = 'O'
     rooms[gameid]['members'].append([sessionid, playerid])  
-    
+
     for member in rooms[gameid]['members']:
         sessionid, playerid = member[0], member[1]
         print(sessionid)
         payLoad = { 'playerid': playerid, 'moves': rooms[gameid]['moves'] }
         emit('game_connect_response', payLoad, room=sessionid)
+
+    if len(rooms[gameid]['members']) == 2:
+        member = rooms[gameid]['members'][0]
+        sessionid = member[0]
+        emit('join_response', room=sessionid)
 
 @socketio.on('play')
 def play(data):

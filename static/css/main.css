@@ -1,6 +1,7 @@
 *{
     padding: 0;
     margin: 0;
+    user-select: none;
 }
 
 :root {
@@ -92,7 +93,7 @@ body {
 }
 
 #turn-label, #turn-count {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: bold;
 }
 
@@ -114,6 +115,7 @@ body {
     padding-bottom: 5px;
     color: var(--grid-main);
     font-weight: bold;
+    display: none;
 }
 
 #invite-text {
@@ -274,11 +276,18 @@ body {
 
 #join-text {
     border: 1px solid black;
-    width: 250px;
+    width: 230px;
     font-size: 22px;
     text-align: center;
 }
 
 #join-btn {
     font-weight: bold;
+}
+
+#rules-text {
+    width: 230px;
+    border: 1px solid black;
+    margin-top: 5px;
+    text-align: center;
 }
