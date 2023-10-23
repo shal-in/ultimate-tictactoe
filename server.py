@@ -50,18 +50,22 @@ app.config['SECRET_KEY'] = 'secret_key12'
 socketio = SocketIO(app)
 rooms = {}
 
+
 # define flask url routes
-@app.route('/u-ttt')
+@app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/u-ttt/local')
+@app.route('/local')
 def local(): 
     return render_template('local.html')
 
-@app.route('/u-ttt/<gameid>')
+@app.route('/<gameid>')
 def game_page(gameid):
-    return render_template('online.html')
+    if gameid in rooms:
+        return render_template('online.html')
+    else:
+        return redirect(url_for('index'))
 
 
 
@@ -175,7 +179,7 @@ def game_reconnect(data):
             }
             emit ('game_reconnect_response', payLoad)
 
-
+    
 # Flask app
 if __name__ == '__main__':
     socketio.run(app, port=8000, debug=True)

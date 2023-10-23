@@ -19,7 +19,7 @@
 
 
 <body>
-    <div id="header-container">
+    <div id="header-container" class="fade-in">
         <div id="row1">
             <div id="title">ultimate tic tac toe</div>
             <div id="themes-btn" class="underline-text">theme</div>
@@ -28,11 +28,11 @@
             by <span class="underline-text">shalin</span>
         </div>
     </div>
-    <div id="turn-container">
+    <div id="turn-container" class="fade-in">
         <div id="turn-label"></div>
         <div id="turn-count">turn count: 0</div>
     </div>
-    <div id="gameboard">
+    <div id="gameboard" class="fade-in">
         <div class="large-grid" id="0">
             <div class="small-grid" id="00"></div>
             <div class="small-grid" id="01"></div>
@@ -143,11 +143,12 @@
         <div class="large-grid-text" id="8"></div>
     
     </div>
-   <div id="invite-container">
+   <div id="invite-container" class="fade-in">
         <div id="invite-text">
-            your opponent has not joined the game yet.
+            your opponent has not joined the game yet. 
+            <br><span id="invite-btn"class="underline-text">invite them</span>
+            <span id="text-copied-label">     &nbsp;&nbsp; text copied to clipboard.</span>
         </div>
-        <div id="invite-btn">send invitation</div>
    </div> 
     
     <script src="/static/js/online.js"></script>

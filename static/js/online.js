@@ -92,11 +92,15 @@ socket.on('game_reconnect_response', function(data) {
         if (currentPlayer === playerID) {
             handleEventListeners('add');
             turnLabelText = `you are ${playerID}. it is your turn.`;
+            if (playerID === 'X') {
+                inviteContainerEl.style.display = 'flex';
+            }
         }
         else {
             turnLabelText = `you are ${playerID}. it is your opponent's turn.`;
         }
         turnLabelEl.textContent = turnLabelText;
+        updateColours()
         return
     }
 
@@ -142,6 +146,12 @@ socket.on('game_reconnect_response', function(data) {
 })
 
 socket.on('play_response', function(data) {
+    if (inviteContainerEl.style.display !== 'none') {
+        inviteContainerEl.classList.add('fade-out');
+        setTimeout(function() {
+            inviteContainerEl.style.display = 'none'
+        }, 450)
+    }
     lastMove = data.move;
 
     const id = lastMove[1];
@@ -163,14 +173,49 @@ socket.on('play_response', function(data) {
     turnCount++;
     updateTurnLabel()
 
-    turnLabelText = 'it is your turn';
-    turnLabelEl.textContent = turnLabelText;
+    if (!gameWinner) {
+        turnLabelText = 'it is your turn';
+        turnLabelEl.textContent = turnLabelText;
+    }
 })
 
 socket.on('join_response', function() {
-    inviteContainerEl.style.display = 'none'
+    inviteContainerEl.classList.add('fade-out');
+    setTimeout(function() {
+        inviteContainerEl.style.display = 'none'
+    }, 450)
 })
 
+// invite
+let inviteBtnEl = document.querySelector('#invite-btn');
+
+inviteBtnEl.addEventListener('click', sendInvite)
+
+function sendInvite() {
+    inviteText = `come play ultimate tic tac toe with me\non ${currentURL}\n\nmade by shalin.\nbyshalin.com`;
+    
+    const textArea = document.createElement('textarea');
+    textArea.value = inviteText;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+
+    let textCopiedLabel = document.querySelector('#text-copied-label');
+
+    textCopiedLabel.classList.add('fade-in');
+    textCopiedLabel.style.display = 'inline';
+    
+    setTimeout(function() {
+        textCopiedLabel.classList.add('fade-out');
+        textCopiedLabel.classList.remove('fade-in');
+        
+        setTimeout(function() {
+            textCopiedLabel.style.display = 'none';
+            textCopiedLabel.classList.remove('fade-out');
+        }, 490);
+    }, 1600);
+}
 // themes
 const root = document.documentElement;
 
@@ -195,8 +240,10 @@ function toggleThemes() {
     root.style.setProperty('--BG-main', `var(--BG-${theme})`);
     root.style.setProperty('--grid-main', `var(--grid-${theme})`);
     root.style.setProperty('--gridBG-main', `var(--gridBG-${theme})`);
-    root.style.setProperty('--X-main', `var(--X-${theme})`);
-    root.style.setProperty('--O-main', `var(--O-${theme})`);
+    root.style.setProperty('--X1-main', `var(--X1-${theme})`);
+    root.style.setProperty('--X2-main', `var(--X2-${theme})`);
+    root.style.setProperty('--O1-main', `var(--O1-${theme})`);
+    root.style.setProperty('--O2-main', `var(--O2-${theme})`);
     root.style.setProperty('--winning-main', `var(--winning-${theme})`);
 
 }
@@ -229,7 +276,7 @@ function homeBtnFunction() {
 }
 
 function linkBtnFunction() {
-    urlToOpen = 'https://google.com';
+    urlToOpen = 'https://byshalin.com';
     window.open(urlToOpen, '_blank')
 }
 
@@ -276,7 +323,7 @@ let nextLargeGrid = 'none';
 let largeGridPlayed;
 
 toggleThemes()
-updateColours()
+// updateColours()
 
 
 // define functions
@@ -304,6 +351,9 @@ function boxClicked(e) {
     currentPlayer = changeCurrentPlayer();
 
     // set up for next turn
+    if (gameWinner) {
+        return
+    }
     turnLabelText = `it is your opponent's turn`;
     turnLabelEl.textContent = turnLabelText;
     updateColours()
@@ -390,7 +440,7 @@ function checkGame(largeGridPlayed) {
     else { // check all grids
         for (let largeGridPlayed=0; largeGridPlayed<9; largeGridPlayed++) {
             row = fullGameArray[largeGridPlayed];
-            for (combo of winningCombos) {
+            for (combo  of winningCombos) {
                 let a = combo[0]; let b = combo[1]; let c = combo[2];
                 
                 if (row[a] !== '') {

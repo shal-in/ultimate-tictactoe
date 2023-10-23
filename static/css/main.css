@@ -4,26 +4,59 @@
     user-select: none;
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.7s;
+}
+
+.fade-out {
+    animation: fadeOut 0.5s;
+    transition: opacity 0.5s;
+}
+
 :root {
     --BG-main: var(--BG-light); 
     --grid-main: var(--grid-light);
     --gridBG-main: var(--gridBG-light);
-    --X-main: var(--X-light);
-    --O-main: var(--O-light);
+    --X-main: var(--X1-light);
+    --X2-main:var(--X2-light);
+    --O-main: var(--O1-light);
+    --O2-main: var(--O2-light);
     --winning-main: var(--winning-light);
 
     --BG-light: #E0E0E2; 
     --grid-light: #3B2C35;
     --gridBG-light: #607B7D;
-    --X-light: #2B56A1;
-    --O-light: #CC3F0C;
+    --X1-light: #2B56A1;
+    --X2-light: #2b56a17a;
+    --O1-light: #CC3F0C;
+    --O2-light: #cc3f0c7e;
     --winning-light: orange;
 
     --BG-dark: orange; 
     --grid-dark: yellow;
     --gridBG-dark: green;
-    --X-dark: aqua;
-    --O-dark: olive;
+    --X1-dark: aqua;
+    --O1-dark: olive;
     --winning-dark: purple;
 }
  
@@ -120,22 +153,15 @@ body {
 
 #invite-text {
     margin-left: 5px;
-    text-align: center;
+    text-align: left;
 }
 
 #invite-btn {
-    border: 1px solid var(--grid-main);
-    border-radius: 5px;
-    width: 250px;
-    height: 25px;
-    text-align: center;
-    margin-top: 5px;
-    background-color: var(--BG-main);
-    font-size: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+    font-size: 21px;
+}
+
+#text-copied-label {
+    display: none;
 }
 
 #gameboard {
@@ -179,9 +205,10 @@ body {
 
 .large-grid-text {
     padding: 5px;
+    padding-top: 20px;
     padding-left: none;
     width: 108px;
-    height: 107px;
+    height: 80px;
     margin-left: -118px;
     margin-bottom: 1px;
     display: none;
@@ -291,3 +318,4 @@ body {
     margin-top: 5px;
     text-align: center;
 }
+
