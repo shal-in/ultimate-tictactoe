@@ -60,17 +60,16 @@ def index():
 def local(): 
     return render_template('local.html')
 
+@app.route('/rules')
+def rules():
+    return render_template('rules.html')
+
 @app.route('/<gameid>')
 def game_page(gameid):
     if gameid in rooms:
         return render_template('online.html')
     else:
         return redirect(url_for('index'))
-
-
-
-
-
 
 
 # define socketio events

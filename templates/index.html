@@ -32,13 +32,18 @@
             }
 
             #title, #link-btn {
-                font-size: 60px;
+                font-size: 48px;
                 margin-left: none;
                 margin-top: none;
             }
 
             #link-btn {
-                font-size: 40px;
+                font-size: 35px;
+            }
+
+            #title-container {
+                padding-bottom: 12px;
+                border-bottom: 1px solid var(--grid-main);
             }
         </style>
     </div>
@@ -51,8 +56,10 @@
     <div id="button-container" class="fade-in">
         <div id="local-btn" class="underline-text">local game</div>
         <div id="online-btn" class="underline-text">online game</div>
-        <div id="join-text">have a game code? <span id="join-btn" class="underline-text">join</span>
-        </div>
+        <div id="join-text">
+            <input id="join-input" placeholder="  have a game code?"></input>
+            
+            <span id="join-btn" class="underline-text">join</span></div>
 
         <div id="rules-text">you can find a simple explanation of the rules <span id="rules-btn" class="underline-text">
             here

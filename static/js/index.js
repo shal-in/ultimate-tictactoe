@@ -7,6 +7,7 @@ const localBtnEl = document.querySelector('#local-btn');
 const onlineBtnEl = document.querySelector('#online-btn');
 const joinBtnEl = document.querySelector('#join-btn');
 const rulesBtnEl = document.querySelector('#rules-btn');
+const joinInputEl = document.querySelector('#join-input');
 
 themesBtnEl.addEventListener('click', themesIndexCounter)
 linkBtnEl.addEventListener('click', linkBtnFunction);
@@ -14,38 +15,50 @@ localBtnEl.addEventListener('click', localBtnFunction);
 onlineBtnEl.addEventListener('click', onlineBtnFunction);
 joinBtnEl.addEventListener('click', joinBtnFunction);
 rulesBtnEl.addEventListener('click', rulesBtnFunction);
-
+joinInputEl.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' || event.keyCode === 13) {
+        joinBtnFunction();
+    }
+})
 
 // button functions
-function themesBtnFunction() {
-    console.log('themes');
-}
-
 function linkBtnFunction() {
+    buttonClickColor(linkBtnEl);
     urlToOpen = 'https://byshalin.com';
     window.open(urlToOpen, '_blank')
 }   
 
 function localBtnFunction() {
-    console.log('local');
+    buttonClickColor(localBtnEl);
     clearPage('/local')
 }
 
 function onlineBtnFunction() {
-    console.log('online');
-
+    buttonClickColor(onlineBtnEl);
     socket.emit('online_request');
 }
 
 function joinBtnFunction() {
-    console.log('join');
-    let gameid = window.prompt(' please enter game code');
+    buttonClickColor(joinBtnEl);
+    if (joinInputEl.value === '') {
+        joinInputEl.focus();
+        return
+    }
+    let gameid = joinInputEl.value;
+    joinInputEl.value = '';
 
+
+    if (gameid.length !== 11) {
+        console.log('invalid gameid')
+        return
+    }
+    
     socket.emit('join_request', { 'gameid': gameid } );
 }
 
 function rulesBtnFunction() {
-    console.log('rules');
+    buttonClickColor(rulesBtnEl)
+    window.open('/rules', '_blank')
 }
 
 // define socket response events
@@ -119,12 +132,19 @@ function toggleThemes() {
     let theme = themes[themesIndex];
 
     root.style.setProperty('--BG-main', `var(--BG-${theme})`);
+    root.style.setProperty('--secondary-main', `var(--secondary-${theme})`);
     root.style.setProperty('--grid-main', `var(--grid-${theme})`);
     root.style.setProperty('--gridBG-main', `var(--gridBG-${theme})`);
-    root.style.setProperty('--X-main', `var(--X-${theme})`);
+    root.style.setProperty('--X1-main', `var(--X1-${theme})`);
     root.style.setProperty('--X2-main', `var(--X2-${theme})`);
-    root.style.setProperty('--O1-main', `var(--O-${theme})`);
-    root.style.setProperty('--O-main', `var(--O2-${theme})`);
+    root.style.setProperty('--O1-main', `var(--O1-${theme})`);
+    root.style.setProperty('--O2-main', `var(--O2-${theme})`);
     root.style.setProperty('--winning-main', `var(--winning-${theme})`);
+}
 
+function buttonClickColor(element) {
+    element.style.color = `var(--secondary-main)`;
+    setTimeout(function() {
+        element.style.color = `var(--grid-main)`;
+    }, 700)
 }

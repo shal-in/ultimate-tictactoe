@@ -52,7 +52,7 @@ socket.on('game_connect_response', function(data) {
     
         e = fullGameEl[largeGridPlayed][smallGridPlayed];
         e.innerHTML = currentPlayer;
-        e.style.color = currentPlayerColour(currentPlayer);
+        e.style.color = `var(--${currentPlayer}1-main)`;
         fullGameArray[largeGridPlayed][smallGridPlayed] = currentPlayer;
 
         currentPlayer = changeCurrentPlayer();
@@ -75,6 +75,7 @@ socket.on('game_connect_response', function(data) {
     }
 
     turnLabelEl.textContent = turnLabelText;
+    turnCountEl.style.display = 'inline'
     updateColours()
 })
 
@@ -101,6 +102,7 @@ socket.on('game_reconnect_response', function(data) {
         }
         turnLabelEl.textContent = turnLabelText;
         updateColours()
+        turnCountEl.style.display = 'inline'
         return
     }
 
@@ -114,7 +116,7 @@ socket.on('game_reconnect_response', function(data) {
         
             e = fullGameEl[largeGridPlayed][smallGridPlayed];
             e.innerHTML = currentPlayer;
-            e.style.color = currentPlayerColour(currentPlayer);
+            e.style.color = `var(--${currentPlayer}1-main)`;
             fullGameArray[largeGridPlayed][smallGridPlayed] = currentPlayer;
     
             checkGame(largeGridPlayed);
@@ -140,6 +142,7 @@ socket.on('game_reconnect_response', function(data) {
 
         turnLabelEl.textContent = turnLabelText;
         updateTurnLabel()
+        turnCountEl.style.display = 'inline'
         updateColours()
     }
     
@@ -161,7 +164,7 @@ socket.on('play_response', function(data) {
 
     e = fullGameEl[largeGridPlayed][smallGridPlayed];
     e.innerHTML = currentPlayer;
-    e.style.color = currentPlayerColour(currentPlayer);
+    e.style.color = `var(--${currentPlayer}1-main)`;
     fullGameArray[largeGridPlayed][smallGridPlayed] = currentPlayer;
 
     checkGame(largeGridPlayed)
@@ -192,6 +195,7 @@ let inviteBtnEl = document.querySelector('#invite-btn');
 inviteBtnEl.addEventListener('click', sendInvite)
 
 function sendInvite() {
+    buttonClickColor(inviteBtnEl);
     inviteText = `come play ultimate tic tac toe with me\non ${currentURL}\n\nmade by shalin.\nbyshalin.com`;
     
     const textArea = document.createElement('textarea');
@@ -226,6 +230,7 @@ if (!themesIndex) {
 }
 
 function themesIndexCounter() {
+    buttonClickColor(themesBtnEl);
     themesIndex ++;
     if (themesIndex >= themes.length) {
         themesIndex = 0;
@@ -238,6 +243,7 @@ function toggleThemes() {
     let theme = themes[themesIndex];
 
     root.style.setProperty('--BG-main', `var(--BG-${theme})`);
+    root.style.setProperty('--secondary-main', `var(--secondary-${theme})`);
     root.style.setProperty('--grid-main', `var(--grid-${theme})`);
     root.style.setProperty('--gridBG-main', `var(--gridBG-${theme})`);
     root.style.setProperty('--X1-main', `var(--X1-${theme})`);
@@ -334,7 +340,7 @@ function boxClicked(e) {
     let smallGridPlayed = parseInt(id[1]);
 
     e.target.innerHTML = currentPlayer;
-    e.target.style.color = currentPlayerColour(currentPlayer);
+    e.target.style.color = `var(--${currentPlayer}1-main)`;
     fullGameArray[largeGridPlayed][smallGridPlayed] = currentPlayer;
     handleEventListeners('remove');
     turnCount++;
@@ -352,6 +358,7 @@ function boxClicked(e) {
 
     // set up for next turn
     if (gameWinner) {
+        updateColours();
         return
     }
     turnLabelText = `it is your opponent's turn`;
@@ -423,8 +430,13 @@ function checkGame(largeGridPlayed) {
                     largeGameArray[largeGridPlayed] = row[a];
                     largeGridTextEl[largeGridPlayed].innerHTML = row[a];
                     largeGridTextEl[largeGridPlayed].style.display = 'flex';
-                    largeGridTextEl[largeGridPlayed].style.color = currentPlayerColour(currentPlayer);
-
+                    largeGridTextEl[largeGridPlayed].style.color = `var(--${currentPlayer}1-main)`;
+                    for (col=0; col<9; col++) {
+                        if (fullGameArray[largeGridPlayed][col] !== '') {
+                            let player = fullGameArray[largeGridPlayed][col];
+                            fullGameEl[largeGridPlayed][col].style.color = `var(--${player}2-main)`;
+                        }
+                    }
                 }
             }
         }
@@ -434,6 +446,12 @@ function checkGame(largeGridPlayed) {
             largeGridTextEl[largeGridPlayed].innerHTML = '-';
             largeGridTextEl[largeGridPlayed].style.display = 'flex';
             largeGridTextEl[largeGridPlayed].style.color = 'var(--grid-main)';
+            for (col=0; col<9; col++) {
+                if (fullGameArray[largeGridPlayed][col] !== '') {
+                    let player = fullGameArray[largeGridPlayed][col];
+                    fullGameEl[largeGridPlayed][col].style.color = `var(--${player}2-main)`;
+                }
+            }
         }
     }
 
@@ -448,7 +466,13 @@ function checkGame(largeGridPlayed) {
                         largeGameArray[largeGridPlayed] = row[a];
                         largeGridTextEl[largeGridPlayed].innerHTML = row[a];
                         largeGridTextEl[largeGridPlayed].style.display = 'flex';
-                        largeGridTextEl[largeGridPlayed].style.color = currentPlayerColour(currentPlayer);
+                        largeGridTextEl[largeGridPlayed].style.color = `var(--${currentPlayer}1-main)`;
+                        for (col=0; col<9; col++) {
+                            if (fullGameArray[largeGridPlayed][col] !== '') {
+                                let player = fullGameArray[largeGridPlayed][col];
+                                fullGameEl[largeGridPlayed][col].style.color = `var(--${player}2-main)`;
+                            }
+                        }
                     }
                 }
             }
@@ -458,6 +482,12 @@ function checkGame(largeGridPlayed) {
                 largeGridTextEl[largeGridPlayed].innerHTML = '-';
                 largeGridTextEl[largeGridPlayed].style.display = 'flex';
                 largeGridTextEl[largeGridPlayed].style.color = 'var(--grid-main)';
+                for (col=0; col<9; col++) {
+                    if (fullGameArray[largeGridPlayed][col] !== '') {
+                        let player = fullGameArray[largeGridPlayed][col];
+                        fullGameEl[largeGridPlayed][col].style.color = `var(--${player}2-main)`;
+                    }
+                }
             }
         }
     }
@@ -468,6 +498,12 @@ function checkGame(largeGridPlayed) {
         largeGridTextEl[largeGridPlayed].innerHTML = '-';
         largeGridTextEl[largeGridPlayed].style.display = 'flex';
         largeGridTextEl[largeGridPlayed].style.color = 'var(--grid-main)';
+        for (col=0; col<9; col++) {
+            if (fullGameArray[largeGridPlayed][col] !== '') {
+                let player = fullGameArray[largeGridPlayed][col];
+                fullGameEl[largeGridPlayed][col].style.color = `var(--${player}2-main)`;
+            }
+        }
     }
  
     // check large grid
@@ -487,7 +523,7 @@ function checkGame(largeGridPlayed) {
                     turnLabelText = `your opponent wins.`;
                 }
                 turnLabelEl.textContent = turnLabelText;
-                turnCountEl.textContent = ''
+                turnCountEl.style.display = 'none'
                 return
             }
         }
@@ -561,11 +597,12 @@ function changeCurrentPlayer() {
 }
 
 function currentPlayerColour(currentPlayer) {
+    index=1
     if (currentPlayer === 'X') {
-        return 'var(--X-main)'
+        return `var(--X${index}-main)`
     }
     else if (currentPlayer === 'O') {
-        return 'var(--O-main)'
+        return `var(--${currentPlayer}1-main)`
     }
 }
 
@@ -643,3 +680,10 @@ function updateColours() {
         }
     }
 }
+
+function buttonClickColor(element) {
+    element.style.color = `var(--secondary-main)`;
+    setTimeout(function() {
+        element.style.color = `var(--grid-main)`;
+    }, 700)
+} 
